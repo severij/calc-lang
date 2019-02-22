@@ -3,7 +3,6 @@ module Parser where
 import Data.Void (Void)
 import Data.Char (isSpace)
 
-import Control.Monad.Except
 import Text.Megaparsec (Parsec, (<|>))
 import Control.Monad.Combinators (between, eitherP, many)
 import Control.Monad.Combinators.Expr (makeExprParser, Operator( InfixL, Prefix ))
