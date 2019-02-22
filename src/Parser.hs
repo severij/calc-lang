@@ -5,10 +5,10 @@ import Data.Char (isSpace)
 
 import Control.Monad.Except
 import Text.Megaparsec (Parsec, (<|>))
-import Control.Monad.Combinators (between, eitherP)
+import Control.Monad.Combinators (between, eitherP, many)
 import Control.Monad.Combinators.Expr (makeExprParser, Operator( InfixL, Prefix ))
 import Text.Megaparsec (takeWhile1P, try)
-import Text.Megaparsec.Char (char, space, string)
+import Text.Megaparsec.Char (alphaNumChar, char, letterChar, space, string)
 import qualified Text.Megaparsec.Char.Lexer as L
 
 import Expr
@@ -17,13 +17,6 @@ type Parser = Parsec Void String
 
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme space
-
-var :: Parser String
-var = let underscore = '_'
-          letters    = ['a'..'z']
-          digits     = ['0'..'9']
-          pred c     = c == '_' || elem c letters || elem c digits
-      in lexeme $ takeWhile1P (Just "variable") pred
 
 cons :: Parser (Either Double Integer)
 cons = lexeme $ eitherP (try L.float) L.decimal
@@ -54,6 +47,15 @@ leftParen = lexeme $ char '('
 
 rightParen :: Parser Char
 rightParen = lexeme $ char ')'
+
+underscore :: Parser Char
+underscore = lexeme $ char '_'
+
+var :: Parser String
+var = lexeme $ do first <- letterChar <|> underscore
+                  rest  <- many $ alphaNumChar <|> underscore
+                  return $ first : rest
+
 
 operators :: [[Operator Parser Expr]]
 operators = [ [ Prefix (Neg <$ char '-') ]
